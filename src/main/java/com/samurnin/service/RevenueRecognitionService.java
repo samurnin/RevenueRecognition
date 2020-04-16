@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 public interface RevenueRecognitionService {
 
-//    Money recognizedRevenue (long contractNumber, LocalDate asOf);
+    void recognizedRevenue (long contractNumber, LocalDate asOf);
 
-//    void calculateRevenueRecognitions (long contractNumber);
+    void calculateRevenueRecognitions (long contractNumber);
 }
