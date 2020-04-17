@@ -22,7 +22,7 @@
     </bean>
 
     <bean class="org.apache.commons.dbcp2.BasicDataSource"
-          destroy-method="close" id="dataSource">
+          destroy-method="close" id="rootDataSource">
         <property name="driverClassName" value="${driver}"/>
         <property name="url" value="${postgres.db.url}"/>
         <property name="username" value="${postgres.db.user}"/>
