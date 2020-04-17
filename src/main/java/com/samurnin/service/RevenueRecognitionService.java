@@ -1,10 +1,12 @@
 package com.samurnin.service;
 
+import org.joda.money.Money;
+
 import java.time.LocalDate;
 
 public interface RevenueRecognitionService {
 
-    void recognizedRevenue (long contractNumber, LocalDate asOf);
+    Money recognizedRevenue(long contractNumber, LocalDate asOf);
 
-    void calculateRevenueRecognitions (long contractNumber);
+    void calculateRevenueRecognitions(long contractNumber);
 }
