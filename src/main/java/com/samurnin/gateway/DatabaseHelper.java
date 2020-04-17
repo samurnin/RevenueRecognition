@@ -12,7 +12,7 @@ public class DatabaseHelper {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public void setDataSource(DataSource rootDataSource) {
+    private void setDataSource(DataSource rootDataSource) {
         this.jdbcTemplate = new JdbcTemplate(rootDataSource);
     }
 

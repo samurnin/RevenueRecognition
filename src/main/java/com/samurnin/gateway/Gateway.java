@@ -4,19 +4,22 @@ import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class Gateway {
 
     private static final String DROP_TABLES = "DROP TABLE IF EXISTS product, contract, revenue_recognition;";
     private static final String CREATE_PRODUCT = "CREATE TABLE IF NOT EXISTS product (\n" +
-            "            id   SERIAL NOT NULL PRIMARY KEY,\n" +
-            "            name VARCHAR(50) UNIQUE NOT NULL,\n" +
+            "    id   SERIAL NOT NULL PRIMARY KEY,\n" +
+            "    name VARCHAR(50) UNIQUE NOT NULL,\n" +
             "    type VARCHAR(50) UNIQUE NOT NULL );";
     private static final String CREATE_CONTRACT = "CREATE TABLE IF NOT EXISTS contract (\n" +
             "    id         SERIAL NOT NULL PRIMARY KEY,\n" +
@@ -38,11 +41,18 @@ public class Gateway {
                     " WHERE id = ? AND c.product = p.id";
     private static final String insertRecognitionStatement =
             "INSERT INTO revenueRecognitions VALUES (?, ?, ?)";
+
+    private SimpleJdbcInsert insertProduct;
+    private SimpleJdbcInsert insertContract;
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public void setDataSource(DataSource companyDataSource) {
+    private void setDataSource(DataSource companyDataSource) {
         this.jdbcTemplate = new JdbcTemplate(companyDataSource);
+        this.insertProduct = new SimpleJdbcInsert(companyDataSource).withTableName("product")
+                .usingGeneratedKeyColumns("id");
+        this.insertContract = new SimpleJdbcInsert(companyDataSource).withTableName("contract")
+                .usingGeneratedKeyColumns("id");
     }
 
     public void createTables() {
@@ -72,4 +82,18 @@ public class Gateway {
         jdbcTemplate.update(insertRecognitionStatement, contractID, amount, asOf);
     }
 
+    public int addProduct(String name, String type) {
+        Map<String, Object> parameters = new HashMap<>(2);
+        parameters.put("name", name);
+        parameters.put("type", type);
+        return insertProduct.executeAndReturnKey(parameters).intValue();
+    }
+
+    public int addContract(int productId, BigDecimal revenue, LocalDate date) {
+        Map<String, Object> parameters = new HashMap<>(3);
+        parameters.put("product", productId);
+        parameters.put("revenue", revenue);
+        parameters.put("date", date);
+        return insertContract.executeAndReturnKey(parameters).intValue();
+    }
 }
