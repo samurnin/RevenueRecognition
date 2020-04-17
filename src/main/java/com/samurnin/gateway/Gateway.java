@@ -1,7 +1,5 @@
 package com.samurnin.gateway;
 
-import org.joda.money.CurrencyUnit;
-import org.joda.money.Money;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -24,23 +22,23 @@ public class Gateway {
     private static final String CREATE_CONTRACT = "CREATE TABLE IF NOT EXISTS contract (\n" +
             "    id         SERIAL NOT NULL PRIMARY KEY,\n" +
             "    product    INT REFERENCES product (id) NOT NULL,\n" +
-            "    revenue    NUMERIC(15,6),\n" +
-            "    dateSigned DATE);";
+            "    revenue    NUMERIC(15,2),\n" +
+            "    dateSigned DATE );";
     private static final String CREATE_REVENUE_RECOGNITION = "CREATE TABLE IF NOT EXISTS revenue_recognition (\n" +
             "    contract     INT REFERENCES contract (id) NOT NULL,\n" +
-            "    amount       NUMERIC(15,6),\n" +
+            "    amount       NUMERIC(15,2),\n" +
             "    recognizedOn DATE,\n" +
             "    PRIMARY KEY (contract, recognizedOn));";
     private static final String findRecognitionsStatement =
-            "SELECT amount " +
+            "SELECT sum(amount) " +
                     " FROM revenue_recognition " +
                     " WHERE contract = ? AND recognizedOn <= ?";
     private static final String findContractStatement =
             "SELECT * " +
                     " FROM contract c, product p " +
-                    " WHERE id = ? AND c.product = p.id";
+                    " WHERE c.id = ? AND c.product = p.id";
     private static final String insertRecognitionStatement =
-            "INSERT INTO revenueRecognitions VALUES (?, ?, ?)";
+            "INSERT INTO revenue_recognition VALUES (?, ?, ?)";
 
     private SimpleJdbcInsert insertProduct;
     private SimpleJdbcInsert insertContract;
@@ -62,9 +60,8 @@ public class Gateway {
                 CREATE_REVENUE_RECOGNITION);
     }
 
-    public Money findRecognitionsFor(long contractID, LocalDate asOf) {
-        return jdbcTemplate.queryForObject(findRecognitionsStatement,
-                (rs, i) -> Money.of(CurrencyUnit.USD, rs.getBigDecimal("amount")), contractID, asOf);
+    public BigDecimal findRecognitionsFor(long contractID, LocalDate asOf) {
+        return jdbcTemplate.queryForObject(findRecognitionsStatement, BigDecimal.class, contractID, asOf);
     }
 
     public ContractDetails findContract(long contractID) {
@@ -93,7 +90,7 @@ public class Gateway {
         Map<String, Object> parameters = new HashMap<>(3);
         parameters.put("product", productId);
         parameters.put("revenue", revenue);
-        parameters.put("date", date);
+        parameters.put("dateSigned", date);
         return insertContract.executeAndReturnKey(parameters).intValue();
     }
 }

@@ -19,6 +19,7 @@ public class DatabaseHelper {
     public void createDb() {
         this.jdbcTemplate.batchUpdate("DROP DATABASE IF EXISTS company;",
                 "CREATE DATABASE company;",
+                "DROP USER IF EXISTS c_admin;",
                 "CREATE USER c_admin WITH ENCRYPTED PASSWORD 'c_pass';",
                 "GRANT ALL PRIVILEGES ON DATABASE company TO c_admin;");
     }
