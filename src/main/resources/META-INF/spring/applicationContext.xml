@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd ">
+
+    <context:component-scan base-package="com.samurnin"/>
+
+    <context:property-placeholder
+            location="classpath*:META-INF/database.properties"/>
+
+    <bean class="org.apache.commons.dbcp2.BasicDataSource"
+          destroy-method="close" id="rootDataSource">
+        <property name="driverClassName" value="${driver}"/>
+        <property name="url" value="${postgres.db.url}"/>
+        <property name="username" value="${postgres.db.user}"/>
+        <property name="password" value="${postgres.db.password}"/>
+    </bean>
+
+    <bean class="org.apache.commons.dbcp2.BasicDataSource"
+          destroy-method="close" id="companyDataSource">
+        <property name="driverClassName" value="${driver}"/>
+        <property name="url" value="${company.db.url}"/>
+        <property name="username" value="${company.db.user}"/>
+        <property name="password" value="${company.db.password}"/>
+    </bean>
+
+</beans>
